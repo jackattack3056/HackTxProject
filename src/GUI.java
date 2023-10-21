@@ -1,6 +1,9 @@
 import java.io.*;
 import javax.swing.*;
 
+import java.awt.Font;
+import java.awt.event.*;
+
 public class GUI {
 	
     // Main driver method
@@ -10,35 +13,44 @@ public class GUI {
     	} catch (Exception e) {
     	    e.printStackTrace();
     	}
-    	
         JFrame frame = new JFrame(); // creating instance of JFrame
  
-        JButton button = new JButton("Click Here!!!!"); // creating instance of JButton
-        button.setBounds(500, 500, 220, 50); // x axis, y axis, width, height
- 
+        JLabel l1 = new JLabel("Select Wanted Language:");
+        
+        l1.setBounds(50, 30, 200, 15);
+        frame.add(l1);
+  
+        final JLabel label = new JLabel();          
+        label.setSize(400, 100);  
+        label.setBounds(50, 85, 300, 20);
+        JButton b = new JButton("Choose");  
+        b.setBounds(200, 50, 75, 20);  
+        String languages[] = {"Spanish","French","Chinese", "Japanese", "Greek", "Austrian",
+        		"Finnish", "Swahili", "Russian", "Portugese", "Romanian"};        
+        final JComboBox cb = new JComboBox(languages);    
+        cb.setBounds(50, 50, 90, 20);    
+        frame.add(cb); frame.add(label); frame.add(b); 
+        
+        JTextArea text = new JTextArea("Paste Text Here");
+        text.setBounds(50, 110, 575, 485);
+        text.setLineWrap(true);
+        text.setWrapStyleWord(true);
+        frame.add(text);
+        
+        b.addActionListener(new ActionListener() {  
+            public void actionPerformed(ActionEvent e) {       
+            	String data = "Language Selected: "   + cb.getItemAt(cb.getSelectedIndex());  
+            	label.setText(data); 
+            }  
+        });
+        
+        JButton button = new JButton("Done"); // creating instance of JButton
+        button.setBounds(545, 600, 80, 20); // x axis, y axis, width, height
         frame.add(button); // adding button in JFrame
  
-        frame.setSize(1275, 675); // 400 width and 500 height
+        frame.setSize(1275, 675); // 1275 width and 675 height
         frame.setLayout(null); // using no layout managers
         frame.setVisible(true); // making the frame visible
-        
-        JLabel l1 = new JLabel("Select known Languages");
-        
-        l1.setBounds(100, 50, 120, 80);
-        frame.add(l1);
- 
-        JCheckBox c2 = new JCheckBox("Hindi");
-        c2.setBounds(100, 150, 50, 50);
-        frame.add(c2);
-        JCheckBox c3 = new JCheckBox("English");
-        c3.setBounds(100, 200, 80, 50);
-        frame.add(c3);
-        JCheckBox c4 = new JCheckBox("marathi");
-        c4.setBounds(100, 250, 80, 50);
-        frame.add(c4);
- 
-        frame.setSize(500, 500);
-        frame.setLayout(null);
-        frame.setVisible(true);
     }
+    
 }
