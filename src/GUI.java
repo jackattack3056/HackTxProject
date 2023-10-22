@@ -1,5 +1,6 @@
 import java.io.*;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 import javax.swing.*;
 import java.awt.FlowLayout;
@@ -15,16 +16,23 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;  
 import javax.swing.JScrollPane;  
 import javax.swing.border.LineBorder;
-import javax.swing.filechooser.FileSystemView; 
+import javax.swing.filechooser.FileSystemView;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.DefaultHighlighter;
+import javax.swing.text.Document;
+import javax.swing.text.Highlighter;
+import javax.swing.text.Highlighter.HighlightPainter;
+import javax.swing.text.JTextComponent;
 import javax.swing.filechooser.FileFilter;
 
-public class GUI {
+public class GUI implements MouseListener {
 	
 	private JDialog d;
 	private String fromLanguage;
 	private String toLanguage;
 	private File uploadedFile;
 	private ArrayList<String> highlightedWords;
+	private JTextArea textBox;
 	
 	public static void main(String[] args) throws IOException {
 		new GUI();
@@ -50,25 +58,26 @@ public class GUI {
         getToLanguage(frame);
         
         // big text box
-        JTextArea text = new JTextArea();
-        text.setBounds(50, 110, 575, 475);
-        text.setLineWrap(true);
-        text.setWrapStyleWord(true);
+        textBox = new JTextArea();
+        textBox.setBounds(50, 110, 575, 475);
+        textBox.setLineWrap(true);
+        textBox.setWrapStyleWord(true);
         Font font = new Font("Dialog", Font.PLAIN, 12);
-        text.setFont(font);
-        JScrollPane scroll = new JScrollPane(text);
+        textBox.setFont(font);
+        JScrollPane scroll = new JScrollPane(textBox);
         scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
-        scroll.add(text);
-        frame.add(text);
+        scroll.add(textBox);
+        frame.add(textBox);
+        textBox.addMouseListener(this);
         
-        uploadFileSetUp(frame, text);
+        uploadFileSetUp(frame, textBox);
         
         // Clear button
         JButton clearButton = new JButton("Clear");
         clearButton.setBounds(545, 590, 80, 20); // x axis, y axis, width, height
         clearButton.addActionListener(new ActionListener() {  
             public void actionPerformed(ActionEvent e) {       
-            	text.setText(null);
+            	textBox.setText(null);
             }  
         });
         frame.add(clearButton);
@@ -188,5 +197,68 @@ public class GUI {
                 }
             }  
         });
+    }
+    
+    public void mouseClicked(MouseEvent e) {}
+    
+    public void mouseEntered(MouseEvent e) {}
+    
+    public void mouseExited(MouseEvent e) {}  
+    
+    public void mousePressed(MouseEvent e) {} 
+    
+    public void mouseReleased(MouseEvent e) {
+    	if (textBox.getSelectedText() != null) { // See if they selected something 
+    		String s = textBox.getSelectedText();
+    		highlightWords(s);
+        }
+    }
+    
+    public void highlightWords(String s) {
+        //removeHighlights(textBox);
+
+        try
+        {
+            Highlighter hilite = textBox.getHighlighter();
+            Document doc = textBox.getDocument();
+            String text = doc.getText(0, doc.getLength());
+            int pos = 0;
+
+            // Search for pattern
+            // see I have updated now its not case sensitive 
+            while ((pos = text.toUpperCase().indexOf(s.toUpperCase(), pos)) >= 0)
+            {
+                // Create highlighter using private painter and apply around pattern
+                hilite.addHighlight(pos, pos+s.length(), myHighlightPainter);
+                pos += s.length();
+            }
+        } catch (BadLocationException e) {
+        }
+    }
+    
+    // Removes only our private highlights
+    public void removeHighlights(JTextComponent textComp)
+    {
+        Highlighter hilite = textComp.getHighlighter();
+        Highlighter.Highlight[] hilites = hilite.getHighlights();
+        for (int i=0; i<hilites.length; i++)
+        {
+            if (hilites[i].getPainter() instanceof MyHighlightPainter)
+            {
+                hilite.removeHighlight(hilites[i]);
+            }
+        }
+    }
+    
+    // An instance of the private subclass of the default highlight painter
+    Highlighter.HighlightPainter myHighlightPainter = new MyHighlightPainter(Color.yellow);
+
+    // A private subclass of the default highlight painter
+    class MyHighlightPainter extends DefaultHighlighter.DefaultHighlightPainter
+    {
+        public MyHighlightPainter(Color color)
+        {
+            super(color);
+        }
     }
 }
