@@ -1,7 +1,6 @@
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Scanner;
-
 import javax.swing.*;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -21,13 +20,17 @@ import javax.swing.filechooser.FileFilter;
 
 public class GUI {
 	
-	private static JDialog d;
-	private static String fromLanguage;
-	private static String toLanguage;
-	private static File uploadedFile;
-	private static ArrayList<String> highlightedWords;
+	private JDialog d;
+	private String fromLanguage;
+	private String toLanguage;
+	private File uploadedFile;
+	private ArrayList<String> highlightedWords;
 	
-    public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws IOException {
+		new GUI();
+	}
+	
+    public GUI() throws IOException {
     	try { 
     	    UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
     	} catch (Exception e) {
@@ -36,7 +39,7 @@ public class GUI {
     	
     	fromLanguage = "English";
     	toLanguage = "English";
-    	ArrayList<String> highlightedWords = new ArrayList<String>();
+    	highlightedWords = new ArrayList<String>();
     	
     	// creating instance of JFrame
         JFrame frame = new JFrame(); 
@@ -51,6 +54,8 @@ public class GUI {
         text.setBounds(50, 110, 575, 475);
         text.setLineWrap(true);
         text.setWrapStyleWord(true);
+        Font font = new Font("Dialog", Font.PLAIN, 12);
+        text.setFont(font);
         JScrollPane scroll = new JScrollPane(text);
         scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
         scroll.add(text);
@@ -68,9 +73,17 @@ public class GUI {
         });
         frame.add(clearButton);
         
-        // user highlighting words
+        // side panel for definitions and highlighted words
+        JPanel panel = new JPanel();
+        panel.setBounds(650, 30, 575, 570);    
+        panel.setBackground(Color.gray);
+        //frame.add(panel);
         
-        
+        JLabel wrds = new JLabel("Words Highlighted:");
+        wrds.setBounds(400, 30, 100, 20);
+        wrds.setVisible(true);
+        panel.add(wrds);
+        frame.add(panel);
         
         frame.setSize(1275, 675); // 1275 width and 675 height
         frame.setLayout(null); // using no layout managers
@@ -78,7 +91,7 @@ public class GUI {
     }
     
     // pop-up window
-    public static void popUpWelcome(JFrame frame) {
+    public void popUpWelcome(JFrame frame) {
     	d = new JDialog(frame, "Welcome to Translator App (name in progress)", true);  
         d.setLayout(new FlowLayout());  
         JButton but = new JButton("OK");  
@@ -94,7 +107,7 @@ public class GUI {
         d.setVisible(true);
     }
     
-    public static void getFromLanguage(JFrame frame) {
+    public void getFromLanguage(JFrame frame) {
     	// initial prompt
         JLabel prompt = new JLabel("Select Input Language:");
         prompt.setBounds(50, 30, 200, 15);
@@ -116,7 +129,7 @@ public class GUI {
         });
     }
     
-    public static void getToLanguage(JFrame frame) {
+    public void getToLanguage(JFrame frame) {
     	// initial prompt
         JLabel prompt = new JLabel("Select Translated Language:");
         prompt.setBounds(450, 30, 200, 15);
@@ -138,7 +151,7 @@ public class GUI {
         });
     }
     
-    public static void uploadFileSetUp(JFrame frame, JTextArea text) {
+    public void uploadFileSetUp(JFrame frame, JTextArea text) {
         JLabel filePrompt = new JLabel("Type in selected language or upload a .txt file:");
         filePrompt.setBounds(50, 88, 500, 15);
         frame.add(filePrompt);
@@ -176,10 +189,4 @@ public class GUI {
             }  
         });
     }
-    
-    public static void something() {
-    	
-    }
 }
-
-public class D
