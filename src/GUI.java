@@ -8,13 +8,11 @@ import java.awt.Font;
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.*;
-import java.awt.BorderLayout;  
+import java.awt.BorderLayout;
+import java.awt.CardLayout;
 import java.awt.Color;  
-import java.awt.Dimension;  
-import javax.swing.JButton;  
-import javax.swing.JFrame;  
-import javax.swing.JLabel;  
-import javax.swing.JScrollPane;  
+import java.awt.Dimension;
+
 import javax.swing.border.LineBorder;
 import javax.swing.filechooser.FileSystemView;
 import javax.swing.text.BadLocationException;
@@ -27,12 +25,14 @@ import javax.swing.filechooser.FileFilter;
 
 public class GUI implements MouseListener {
 	
+	private JFrame frame;
 	private JDialog d;
 	private String fromLanguage;
 	private String toLanguage;
 	private File uploadedFile;
 	private ArrayList<String> highlightedWords;
 	private JTextArea textBox;
+	private JList wordList;
 	
 	public static void main(String[] args) throws IOException {
 		new GUI();
@@ -50,7 +50,7 @@ public class GUI implements MouseListener {
     	highlightedWords = new ArrayList<String>();
     	
     	// creating instance of JFrame
-        JFrame frame = new JFrame(); 
+        frame = new JFrame(); 
         
         //popUpWelcome(frame);
         
@@ -83,17 +83,65 @@ public class GUI implements MouseListener {
         frame.add(clearButton);
         
         // side panel for definitions and highlighted words
-        JPanel panel = new JPanel();
-        panel.setBounds(650, 30, 575, 570);    
-        panel.setBackground(Color.gray);
+//        JPanel panel = new JPanel();
+//        panel.setBounds(650, 30, 575, 570);    
+//        panel.setBackground(Color.gray);
         //frame.add(panel);
         
-        JLabel wrds = new JLabel("Words Highlighted:");
-        wrds.setBounds(400, 30, 100, 20);
+        // Words Highlighted
+        JLabel wrds = new JLabel("Words Highlighted");
+        wrds.setBounds(730, 30, 100, 20);
         wrds.setVisible(true);
-        panel.add(wrds);
-        frame.add(panel);
+        JButton b = new JButton("Add to Flashcards");  
+        b.setBounds(875, 385, 325, 35);
+        b.setBackground(Color.gray);
+        frame.add(wrds);
+        frame.add(b);
         
+        // WordList Instantiation
+        String array[] = {};
+        wordList = new JList<String>(array);
+        wordList.setBounds(700, 50, 150, 535);  
+        frame.add(wordList);  
+        
+        // Instatiate Definitions Box
+        JLabel defs = new JLabel("Definitions");
+        defs.setBounds(1012, 30, 100, 20);
+        defs.setVisible(true);
+        JTextArea defBox = new JTextArea();
+        defBox.setBounds(875, 50, 325, 325);
+        defBox.setLineWrap(true);
+        defBox.setWrapStyleWord(true);
+        frame.add(defs);
+        frame.add(defBox);
+        
+        // FlashCards
+        JPanel cPanel = new JPanel();
+        CardLayout crd = new CardLayout();
+        cPanel.setLayout(crd);
+        JButton prev = new JButton();
+        JButton next = new JButton();
+        prev.setBounds(800, 650, 200, 100);
+        next.setBounds(950, 650, 200, 100);
+        cPanel.add("a", prev);
+        cPanel.add("b", next);
+        cPanel.setBounds(800, 650, 325, 200);
+        
+        prev.addActionListener(new ActionListener()  {  
+            public void actionPerformed(ActionEvent e) {  
+            	crd.previous(cPanel);
+            }  
+        }); 
+        
+        next.addActionListener(new ActionListener()  {  
+            public void actionPerformed(ActionEvent e) {  
+            	crd.next(cPanel);
+            }  
+        });
+        cPanel.setVisible(true);
+        frame.add(cPanel);
+        
+        // frame settings
         frame.setSize(1275, 675); // 1275 width and 675 height
         frame.setLayout(null); // using no layout managers
         frame.setVisible(true); // making the frame visible
@@ -210,6 +258,8 @@ public class GUI implements MouseListener {
     public void mouseReleased(MouseEvent e) {
     	if (textBox.getSelectedText() != null) { // See if they selected something 
     		String s = textBox.getSelectedText();
+    		highlightedWords.add(s);
+    		updateWordsBox(s);
     		highlightWords(s);
         }
     }
@@ -217,8 +267,7 @@ public class GUI implements MouseListener {
     public void highlightWords(String s) {
         //removeHighlights(textBox);
 
-        try
-        {
+        try {
             Highlighter hilite = textBox.getHighlighter();
             Document doc = textBox.getDocument();
             String text = doc.getText(0, doc.getLength());
@@ -226,8 +275,7 @@ public class GUI implements MouseListener {
 
             // Search for pattern
             // see I have updated now its not case sensitive 
-            while ((pos = text.toUpperCase().indexOf(s.toUpperCase(), pos)) >= 0)
-            {
+            while ((pos = text.toUpperCase().indexOf(s.toUpperCase(), pos)) >= 0) {
                 // Create highlighter using private painter and apply around pattern
                 hilite.addHighlight(pos, pos+s.length(), myHighlightPainter);
                 pos += s.length();
@@ -237,14 +285,11 @@ public class GUI implements MouseListener {
     }
     
     // Removes only our private highlights
-    public void removeHighlights(JTextComponent textComp)
-    {
+    public void removeHighlights(JTextComponent textComp) {
         Highlighter hilite = textComp.getHighlighter();
         Highlighter.Highlight[] hilites = hilite.getHighlights();
-        for (int i=0; i<hilites.length; i++)
-        {
-            if (hilites[i].getPainter() instanceof MyHighlightPainter)
-            {
+        for (int i=0; i < hilites.length; i++) {
+            if (hilites[i].getPainter() instanceof MyHighlightPainter) {
                 hilite.removeHighlight(hilites[i]);
             }
         }
@@ -254,11 +299,20 @@ public class GUI implements MouseListener {
     Highlighter.HighlightPainter myHighlightPainter = new MyHighlightPainter(Color.yellow);
 
     // A private subclass of the default highlight painter
-    class MyHighlightPainter extends DefaultHighlighter.DefaultHighlightPainter
-    {
-        public MyHighlightPainter(Color color)
-        {
+    class MyHighlightPainter extends DefaultHighlighter.DefaultHighlightPainter {
+        public MyHighlightPainter(Color color) {
             super(color);
         }
+    }
+    
+    private void updateWordsBox(String s) {
+    	String array[] = new String[highlightedWords.size()];
+    	for (int i = 0; i < highlightedWords.size(); i++) {
+    		array[i] = highlightedWords.get(i);
+    	}
+    	frame.remove(wordList);
+    	wordList = new JList<String>(array);
+        wordList.setBounds(700, 50, 150, 475); 
+        frame.add(wordList);
     }
 }
